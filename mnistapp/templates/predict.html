@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+	<section>
+		<h1>Prediction Page</h1>
+		<div class="canvas-wrap">
+			<canvas id="pad" width="280" height="280"></canvas>
+			<div class="controls">
+				<button id="clearBtn" type="button">Clear</button>
+				<button
+					id="predictBtn"
+					type="button"
+					hx-post="{% url 'mnistapp:predict_digit' %}"
+					hx-vals="js:{ image_data: window.mnistPad?.toDataURL() }"
+					hx-target="#prediction"
+					hx-swap="innerHTML"
+				>Predict</button>
+			</div>
+		</div>
+		<div id="prediction" class="prediction">Draw a digit and click Predict.</div>
+	</section>
+	<script src="/static/mnistapp/draw.js"></script>
+	<script>
+		window.addEventListener('load', function() {
+			const canvas = document.getElementById('pad');
+			const clearBtn = document.getElementById('clearBtn');
+			const predictBtn = document.getElementById('predictBtn');
+			initPad(canvas);
+			clearBtn.addEventListener('click', () => clearPad(canvas));
+
+			// Optional: auto-predict after pen up (throttled)
+			let pending = null;
+			canvas.addEventListener('mouseup', () => {
+				if (pending) clearTimeout(pending);
+				pending = setTimeout(() => {
+					predictBtn.click();
+				}, 300);
+			});
+			canvas.addEventListener('touchend', () => {
+				if (pending) clearTimeout(pending);
+				pending = setTimeout(() => {
+					predictBtn.click();
+				}, 300);
+			});
+		});
+	</script>
+{% endblock %}
